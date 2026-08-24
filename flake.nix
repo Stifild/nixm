@@ -6,7 +6,7 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
   };
 
-  outputs = { self, nixpkgs, ... }:
+  outputs = { self, nixpkgs, nix-flatpak, ... }:
     let
       system = "x86_64-linux";
 
