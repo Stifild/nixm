@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -22,6 +23,7 @@
         ./modules/desktop-kde.nix
         ./modules/networking.nix
         ./modules/apps.nix
+        nix-flatpak.nixosModules.nix-flatpak
       ];
 
       mkHost = { hostName, extraModules ? [ ] }:

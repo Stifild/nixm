@@ -1,15 +1,23 @@
 { pkgs, ... }:
 {
-  # Flatpak нужен для Orion Browser — его нет ни в nixpkgs, ни на Flathub,
-  # только собственный бета-репозиторий Kagi.
-  services.flatpak.enable = true;
-  services.flatpak.remotes.orion-beta = {
-    url = "https://flatpak.orionbrowser.com/repo/beta/";
+  services.flatpak = {
+    enable = true;
+    
+    # Добавляем Orion Beta репозиторий
+    remotes = [
+      {
+        name = "orion-beta";
+        location = "https://flatpak.orionbrowser.com/repo/beta/orion-beta.flatpakrepo";
+      }
+    ];
+    
+    # Можно также добавить пакеты декларативно
+    packages = [
+      { appId = "com.kagi.Orion"; origin = "orion-beta"; }
+    ];
   };
-  xdg.portal.enable = true;
 
-  # Приложение не ставится декларативно (нет в nixpkgs) — ставится вручную
-  # flatpak install orion-beta com.kagi.Orion
+  xdg.portal.enable = true;
 
   environment.systemPackages = with pkgs; [
     onlyoffice-desktopeditors
