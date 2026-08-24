@@ -14,6 +14,10 @@
       location = "https://flatpak.orionbrowser.com/orion-beta.flatpakrepo";
     }
     ];
+    packages = [
+      "org.gnome.Platform/x86_64/50"
+      { appId = "com.kagi.Orion"; origin = "orion-beta"; }
+    ];
   };
 
   xdg.portal.enable = true;
