@@ -13,6 +13,7 @@
     
     # Можно также добавить пакеты декларативно
     packages = [
+      { appId = "org.gnome.Platform/x86_64/50"; origin = "flathub"; }
       { appId = "com.kagi.Orion"; origin = "orion-beta"; }
     ];
   };
