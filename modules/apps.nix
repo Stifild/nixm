@@ -12,7 +12,6 @@
     {
       name = "orion-beta";
       location = "https://flatpak.orionbrowser.com/orion-beta.flatpakrepo";
-      gpgVerify = false;
     }
     ];
     
