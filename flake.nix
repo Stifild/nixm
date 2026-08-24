@@ -34,8 +34,8 @@
     in
     {
       nixosConfigurations = {
-        nixos-pc = mkHost {
-          hostName = "nixos-pc";
+        mswax-pc = mkHost {
+          hostName = "mswax-pc";
           extraModules = desktopModules;
         };
 
