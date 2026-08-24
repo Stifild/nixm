@@ -14,5 +14,8 @@
   environment.systemPackages = with pkgs; [
     onlyoffice-desktopeditors
     vim
+    git
+    wget
+    curl
   ];
 }
