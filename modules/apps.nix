@@ -5,15 +5,20 @@
     
     # Добавляем Orion Beta репозиторий
     remotes = [
-      {
-        name = "orion-beta";
-        location = "https://flatpak.orionbrowser.com/repo/beta/orion-beta.flatpakrepo";
-      }
+          {
+      name = "flathub";
+      location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+    }
+    {
+      name = "orion-beta";
+      location = "https://flatpak.orionbrowser.com/orion-beta.flatpakrepo";
+      gpgVerify = false;
+    }
     ];
     
     # Можно также добавить пакеты декларативно
     packages = [
-      { appId = "org.gnome.Platform/x86_64/50"; origin = "flathub"; }
+      "org.gnome.Platform/x86_64/50"
       { appId = "com.kagi.Orion"; origin = "orion-beta"; }
     ];
   };
