@@ -6,11 +6,17 @@
     extraConfig = ''
       Include /etc/ssh/sshd_config.d/*.conf
     '';
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false; # PAM тоже не должен пускать по паролю
+    };
   };
 
+  users.users.stifild.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP2yjs9nV/Jra8N2tUxQ2gXanVSjJSxoHf2WsdWDe2Yl"
+  ];
+
   # Ждём, пока tailscaled выдаст IPv4-адрес, и кладём его как единственный ListenAddress.
-  # Как только в sshd_config встречается хотя бы одна директива ListenAddress,
-  # sshd перестаёт слушать 0.0.0.0/:: и биндится только на перечисленные адреса.
   systemd.services.tailscale-sshd-listen = {
     description = "Generate sshd ListenAddress from current Tailscale IPv4";
     after = [ "tailscaled.service" ];
