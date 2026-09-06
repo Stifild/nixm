@@ -23,6 +23,7 @@
         ./modules/desktop-kde.nix
         ./modules/networking.nix
         ./modules/apps.nix
+        ./modules/sshd.nix
         nix-flatpak.nixosModules.nix-flatpak
       ];
 
