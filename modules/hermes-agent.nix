@@ -21,7 +21,7 @@ in
     settings = {
       providers = {
         local = {
-          base_url = "http://10.250.77.1:8080/v1";
+          base_url = "http://127.0.0.1:8080/v1";
           default_model = "ornith-9b";
           context_length = 64000;
           api_key = "not-needed";
