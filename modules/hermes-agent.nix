@@ -51,29 +51,33 @@ in
 
   # ===== LLAMA-SERVER С GPU =====
   systemd.services.llama-server-gpu = {
-    description = "llama.cpp GPU server for Hermes";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    wantedBy = [ "multi-user.target" ];
+  description = "llama.cpp GPU server for Hermes";
+  after = [ "network-online.target" "netns-hermes-egress.service" ];  # Зависимость от netns
+  wants = [ "network-online.target" ];
+  wants = [ "netns-hermes-egress.service" ];
+  wantedBy = [ "multi-user.target" ];
 
-    serviceConfig = {
-      User = "hermes";
-      Group = "hermes";
-      ReadWritePaths = [ "/var/lib/hermes" ];
-      Restart = "always";
-      RestartSec = 5;
+  serviceConfig = {
+    User = "hermes";
+    Group = "hermes";
+    ReadWritePaths = [ "/var/lib/hermes" ];
+    Restart = "always";
+    RestartSec = 5;
+    
+    # Запускаем внутри того же netns
+    NetworkNamespacePath = "/var/run/netns/hermes-egress";
 
-      ExecStart = ''
-        ${llama-cpp-gpu}/bin/llama-server \
-          --host 10.250.77.1 \
-          --port 8080 \
-          --n-gpu-layers 99 \
-          --ctx-size 16384 \
-          --alias ornith-9b \
-          --model /var/lib/hermes/models/model.gguf
-      '';
-    };
+    ExecStart = ''
+      ${llama-cpp-gpu}/bin/llama-server \
+        --host 127.0.0.1 \
+        --port 8080 \
+        --n-gpu-layers 99 \
+        --ctx-size 16384 \
+        --alias ornith-9b \
+        --model /var/lib/hermes/models/model.gguf
+    '';
   };
+};
 
   # ===== HERMES DASHBOARD (веб-интерфейс) =====
   systemd.services.hermes-dashboard = {
