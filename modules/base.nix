@@ -4,6 +4,7 @@
   boot = {
     plymouth = {
       enable = true;
+      theme = "solar";
     };
 
     # Enable "Silent boot"
