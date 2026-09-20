@@ -1,21 +1,30 @@
 { config, pkgs, lib, ... }:
 
 let
-  llama-cpp-gpu = pkgs.llama-cpp.override {
+  # CUDA-сборка llama-cpp, ограниченная архитектурой Ampere (sm_86 = RTX 3060)
+  llama-cpp-gpu = (pkgs.llama-cpp.override {
     cudaSupport = true;
-  };
+  }).overrideAttrs (old: {
+    cmakeFlags = (old.cmakeFlags or []) ++ [
+      "-DCMAKE_CUDA_ARCHITECTURES=86"
+    ];
+    # Запасной механизм: переменная окружения, которую CMake использует
+    # как значение по умолчанию, если проект не задаёт архитектуры сам
+    CUDAARCHS = "86";
+  });
 in
 {
+  # ===== HERMES AGENT (основной сервис) =====
   services.hermes-agent = {
     enable = true;
 
     settings = {
       providers = {
         local = {
-          type = "openai";
           base_url = "http://10.250.77.1:8080/v1";
           default_model = "ornith-9b";
           context_length = 64000;
+          api_key = "not-needed";
         };
         nous.enabled = false;
         openrouter.enabled = false;
@@ -35,10 +44,12 @@ in
     extraDependencyGroups = [ "messaging" ];
   };
 
+  # ===== ПАПКА ДЛЯ МОДЕЛЕЙ =====
   systemd.tmpfiles.rules = [
     "d /var/lib/hermes/models 0755 hermes hermes -"
   ];
 
+  # ===== LLAMA-SERVER С GPU =====
   systemd.services.llama-server-gpu = {
     description = "llama.cpp GPU server for Hermes";
     after = [ "network-online.target" ];
@@ -51,6 +62,7 @@ in
       ReadWritePaths = [ "/var/lib/hermes" ];
       Restart = "always";
       RestartSec = 5;
+
       ExecStart = ''
         ${llama-cpp-gpu}/bin/llama-server \
           --host 10.250.77.1 \
@@ -63,6 +75,7 @@ in
     };
   };
 
+  # ===== HERMES DASHBOARD (веб-интерфейс) =====
   systemd.services.hermes-dashboard = {
     description = "Hermes Agent Dashboard (Web UI)";
     after = [ "tailscale-hermes-up.service" "hermes-agent.service" ];
@@ -87,6 +100,7 @@ in
       Restart = "always";
       RestartSec = 5;
       UMask = "0007";
+
       ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 0.0.0.0 --port 9119 --no-open";
     };
   };
