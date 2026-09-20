@@ -3,7 +3,7 @@
   imports = [
     ./hardware-configuration.nix
   ];
-
+  nixpkgs.config.allowUnfree = true;
   networking.hostName = "mswax-pc";
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia.open = true;
