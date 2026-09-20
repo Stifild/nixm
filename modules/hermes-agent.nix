@@ -1,12 +1,17 @@
 { config, pkgs, ... }:
 let
   # Кастомная сборка llama-cpp только под вашу RTX 3060
-  llama-cpp-gpu = pkgs.llama-cpp.override {
-    cudaSupport = true;
-    # Только архитектура Ampere (RTX 30xx серия)
-    cudaCapabilities = [ "8.6" ];
-    cudaForwardCompat = false;  # не компилировать для будущих поколений
-  };
+    llama-cpp-gpu = pkgs.llama-cpp.overrideAttrs (old: {
+    cmakeFlags = (old.cmakeFlags or []) ++ [
+      "-DGGML_CUDA=ON"
+      "-DCMAKE_CUDA_ARCHITECTURES=86"   # RTX 3060 = Ampere sm_86
+    ];
+    buildInputs = (old.buildInputs or []) ++ (with pkgs.cudaPackages; [
+      cuda_nvcc
+      libcublas
+      cuda_cudart
+    ]);
+  });
 in
 {
   services.hermes-agent = {
@@ -46,7 +51,7 @@ systemd.tmpfiles.rules = [
   ];
 
 systemd.services.llama-server-gpu = {
-    description = "llama.cpp GPU server for Hermes";
+     description = "llama.cpp GPU server for Hermes";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
@@ -57,11 +62,12 @@ systemd.services.llama-server-gpu = {
       ReadWritePaths = [ "/var/lib/hermes" ];
       Restart = "always";
       RestartSec = 5;
-      
-      # ВАЖНО: слушаем на 10.250.77.1 (IP veth-интерфейса хоста)
-      # Этот адрес виден из netns hermes-egress
+      # Даём процессу доступ к CUDA-библиотекам
+      Environment = [
+        "LD_LIBRARY_PATH=${pkgs.cudaPackages.libcublas}/lib:${pkgs.cudaPackages.cuda_cudart}/lib"
+      ];
       ExecStart = ''
-        ${pkgs.llama-cpp.override { cudaSupport = true; }}/bin/llama-server \
+        ${llama-cpp-gpu}/bin/llama-server \
           --host 10.250.77.1 \
           --port 8080 \
           --n-gpu-layers 99 \
