@@ -15,6 +15,13 @@ systemd.services.hermes-dashboard = {
     bindsTo = [ "tailscale-hermes-up.service" ];
     wantedBy = [ "multi-user.target" ];
     
+    # 1. Задаем переменные окружения ПРАВИЛЬНО (на уровне сервиса, а не внутри serviceConfig)
+    environment = {
+      HERMES_HOME = "/var/lib/hermes/.hermes";
+      HERMES_MANAGED = "true";
+      HOME = "/var/lib/hermes";
+    };
+
     serviceConfig = {
       User = "hermes";
       Group = "hermes";
@@ -28,11 +35,8 @@ systemd.services.hermes-dashboard = {
       RestartSec = 5;
       UMask = "0007";
       
-      # Копируем переменные окружения (включая PATH к бинарнику) из основного сервиса
-      Environment = config.systemd.services.hermes-agent.serviceConfig.Environment;
-      
-      # Запускаем сам дашборд
-      ExecStart = "hermes dashboard --host 0.0.0.0 --port 9119 --no-open";
+      # 2. Берем бинарник прямо из пакета, который использует основной сервис
+      ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 0.0.0.0 --port 9119 --no-open";
     };
   };
   systemd.services.hermes-agent = {
