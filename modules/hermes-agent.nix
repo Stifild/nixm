@@ -5,11 +5,7 @@
     settings.model.default = "llama.cpp"; # свой провайдер/модель
     settings.providers.nous.enabled = false;
     settings.providers.openrouter.enabled = false;
-    environmentFiles = [ "/var/lib/hermes/env" ];
-    addToSystemPackages = true;
-    extraDependencyGroups = [ "messaging" ]; # адаптер телеграма
-  };
-settings.dashboard = {
+    settings.dashboard = {
       # Разрешаем подключения по Tailscale IP и MagicDNS имени
       extra_hosts = [ 
         "100.74.132.126" 
@@ -18,6 +14,11 @@ settings.dashboard = {
       # Указываем публичный адрес для клиента
       public_url = "http://100.74.132.126:9119";
     };
+    environmentFiles = [ "/var/lib/hermes/env" ];
+    addToSystemPackages = true;
+    extraDependencyGroups = [ "messaging" ]; # адаптер телеграма
+  };
+
 systemd.services.hermes-dashboard = {
     description = "Hermes Agent Dashboard (Web UI)";
     after = [ "tailscale-hermes-up.service" "hermes-agent.service" ];
