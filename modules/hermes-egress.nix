@@ -8,7 +8,7 @@ let
   nsAddr   = "10.250.77.2";
   tsSock   = "/run/tailscale-hermes/tailscaled.sock";
   tsState  = "/var/lib/tailscale-hermes";
-  exitNode = "REPLACE-ME.tailXXXXX.ts.net"; # tailscale exit-node list
+  exitNode = "nl-server.chameleon-dace.ts.net"; # tailscale exit-node list
 in
 {
   # 1. namespace + veth — только для бутстрапа tailscaled до тейлнета
