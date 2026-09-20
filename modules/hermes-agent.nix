@@ -11,26 +11,30 @@ in
 {
   services.hermes-agent = {
     enable = true;
-    settings.model = {
-      base_url = "http://10.250.77.1:8080/v1";
-      default  = "ornith-9b";
-      context_length = 64000;
-    };
-    settings.providers.nous.enabled = false;
-    settings.auxiliary = {
-      enabled = true;
-      model = "ornith-9b";
-      free_only = true;
-    };
-    settings.providers.openrouter.enabled = false;
-    settings.dashboard = {
-      # Разрешаем подключения по Tailscale IP и MagicDNS имени
-      extra_hosts = [ 
-        "100.74.132.126" 
-        "mswax-pc-hermes-egress.chameleon-dace.ts.net" 
-      ];
-      # Указываем публичный адрес для клиента
-      public_url = "http://100.74.132.126:9119";
+    settings = {
+      # Настраиваем локальный провайдер (OpenAI-совместимый API)
+      providers = {
+        local = {
+          type = "openai";
+          base_url = "http://10.250.77.1:8080/v1";
+          default_model = "ornith-9b";
+          context_length = 64000;
+        };
+      };
+      
+      # Указываем, что по умолчанию использовать локальный провайдер
+      model = {
+        provider = "local";
+        default = "ornith-9b";
+        context_length = 64000;
+      };
+      
+      # Отключаем внешние провайдеры
+      providers.nous.enabled = false;
+      providers.openrouter.enabled = false;
+      
+      # Отключаем auxiliary (вспомогательные задачи через внешние API)
+      auxiliary.enabled = false;
     };
     environmentFiles = [ "/var/lib/hermes/env" ];
     addToSystemPackages = true;
