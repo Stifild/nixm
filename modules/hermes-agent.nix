@@ -1,4 +1,13 @@
 { config, pkgs, ... }:
+let
+  # Кастомная сборка llama-cpp только под вашу RTX 3060
+  llama-cpp-gpu = pkgs.llama-cpp.override {
+    cudaSupport = true;
+    # Только архитектура Ampere (RTX 30xx серия)
+    cudaCapabilities = [ "8.6" ];
+    cudaForwardCompat = false;  # не компилировать для будущих поколений
+  };
+in
 {
   services.hermes-agent = {
     enable = true;
@@ -44,7 +53,7 @@ systemd.services.llama-server-gpu = {
           --host 10.250.77.1 \
           --port 8080 \
           --n-gpu-layers 99 \
-          --ctx-size 8192 \
+          --ctx-size 64000 \
           --model /var/lib/hermes/models/model.gguf
       '';
     };
