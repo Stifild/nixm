@@ -2,7 +2,8 @@
 {
   services.hermes-agent = {
     enable = true;
-    settings.model.default = "llama.cpp"; # свой провайдер/модель
+    settings.model.default = "llamacpp"; # свой провайдер/модель
+    settings.model.base_url = "http://10.250.77.1:8080/v1";
     settings.providers.nous.enabled = false;
     settings.providers.openrouter.enabled = false;
     settings.dashboard = {
@@ -17,6 +18,36 @@
     environmentFiles = [ "/var/lib/hermes/env" ];
     addToSystemPackages = true;
     extraDependencyGroups = [ "messaging" ]; # адаптер телеграма
+  };
+
+systemd.tmpfiles.rules = [
+    "d /var/lib/hermes/models 0755 hermes hermes -"
+  ];
+
+systemd.services.llama-server-gpu = {
+    description = "llama.cpp GPU server for Hermes";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    
+    serviceConfig = {
+      User = "hermes";
+      Group = "hermes";
+      ReadWritePaths = [ "/var/lib/hermes" ];
+      Restart = "always";
+      RestartSec = 5;
+      
+      # ВАЖНО: слушаем на 10.250.77.1 (IP veth-интерфейса хоста)
+      # Этот адрес виден из netns hermes-egress
+      ExecStart = ''
+        ${pkgs.llama-cpp.override { cudaSupport = true; }}/bin/llama-server \
+          --host 10.250.77.1 \
+          --port 8080 \
+          --n-gpu-layers 99 \
+          --ctx-size 8192 \
+          --model /var/lib/hermes/models/model.gguf
+      '';
+    };
   };
 
 systemd.services.hermes-dashboard = {
