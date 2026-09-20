@@ -5,6 +5,13 @@
     settings.model.default = "anthropic/claude-sonnet-4"; # свой провайдер/модель
     environmentFiles = [ "/var/lib/hermes/env" ];
     addToSystemPackages = true;
+    extraDependencyGroups = [ "messaging" ]; # адаптер телеграма
+
+    backend = {
+      mode = "dashboard";  # веб-панель + gateway в одном процессе
+      host = "100.x.y.z";  # tailscale IP хоста (tailscale ip -4)
+      port = 9119;
+    };
   };
   systemd.services.hermes-agent = {
     after = [ "tailscale-hermes-up.service" ];
