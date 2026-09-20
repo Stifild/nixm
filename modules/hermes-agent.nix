@@ -11,7 +11,7 @@ in
 {
   services.hermes-agent = {
     enable = true;
-    settings.model.default = "llamacpp"; # свой провайдер/модель
+    settings.model.default = "Ornith-1.5-9B-Q4_K_M.gguf"; # свой провайдер/модель
     settings.model.base_url = "http://10.250.77.1:8080/v1";
     settings.providers.nous.enabled = false;
     settings.providers.openrouter.enabled = false;
@@ -53,7 +53,7 @@ systemd.services.llama-server-gpu = {
           --host 10.250.77.1 \
           --port 8080 \
           --n-gpu-layers 99 \
-          --ctx-size 64000 \
+          --ctx-size 16384 \
           --model /var/lib/hermes/models/model.gguf
       '';
     };
