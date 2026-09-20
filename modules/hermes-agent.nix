@@ -9,6 +9,15 @@
     addToSystemPackages = true;
     extraDependencyGroups = [ "messaging" ]; # адаптер телеграма
   };
+settings.dashboard = {
+      # Разрешаем подключения по Tailscale IP и MagicDNS имени
+      extra_hosts = [ 
+        "100.74.132.126" 
+        "mswax-pc-hermes-egress.chameleon-dace.ts.net" 
+      ];
+      # Указываем публичный адрес для клиента
+      public_url = "http://100.74.132.126:9119";
+    };
 systemd.services.hermes-dashboard = {
     description = "Hermes Agent Dashboard (Web UI)";
     after = [ "tailscale-hermes-up.service" "hermes-agent.service" ];
