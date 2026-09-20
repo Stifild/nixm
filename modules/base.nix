@@ -1,5 +1,13 @@
 { ... }:
 {
+  # Включаем ccache для всех сборок
+  programs.ccache.enable = true;
+  programs.ccache.package = pkgs.ccache;
+  
+  # Разрешаем ccache для nix-сборок
+  nix.settings.extra-config = ''
+    extra-substituters = file:///var/cache/ccache
+  '';
   # Предполагается UEFI. Для BIOS/legacy — замените на boot.loader.grub.
   boot = {
     plymouth = {
