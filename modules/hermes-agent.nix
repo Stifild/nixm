@@ -52,9 +52,8 @@ in
   # ===== LLAMA-SERVER С GPU =====
   systemd.services.llama-server-gpu = {
   description = "llama.cpp GPU server for Hermes";
-  after = [ "network-online.target" "netns-hermes-egress.service" ];  # Зависимость от netns
-  wants = [ "network-online.target" ];
-  wants = [ "netns-hermes-egress.service" ];
+  after = [ "network-online.target" "netns-hermes-egress.service" ];
+  wants = [ "network-online.target" "netns-hermes-egress.service" ];
   wantedBy = [ "multi-user.target" ];
 
   serviceConfig = {
