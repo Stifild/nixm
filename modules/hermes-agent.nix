@@ -2,7 +2,9 @@
 {
   services.hermes-agent = {
     enable = true;
-    settings.model.default = "anthropic/claude-sonnet-4"; # свой провайдер/модель
+    settings.model.default = "llama.cpp"; # свой провайдер/модель
+    settings.providers.nous.enabled = false;
+    settings.providers.openrouter.enabled = false;
     environmentFiles = [ "/var/lib/hermes/env" ];
     addToSystemPackages = true;
     extraDependencyGroups = [ "messaging" ]; # адаптер телеграма
