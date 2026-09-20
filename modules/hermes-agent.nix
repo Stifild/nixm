@@ -1,23 +1,19 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+
 let
-  # Кастомная сборка llama-cpp только под вашу RTX 3060
-    llama-cpp-gpu = pkgs.llama-cpp.overrideAttrs (old: {
-    cmakeFlags = (old.cmakeFlags or []) ++ [
-      "-DGGML_CUDA=ON"
-      "-DCMAKE_CUDA_ARCHITECTURES=86"   # RTX 3060 = Ampere sm_86
-    ];
-    buildInputs = (old.buildInputs or []) ++ (with pkgs.cudaPackages; [
-      cuda_nvcc
-      libcublas
-      cuda_cudart
-    ]);
-  });
+  # Собираем llama-cpp с CUDA явно через override
+  llama-cpp-gpu = pkgs.llama-cpp.override {
+    cudaSupport = true;
+    cudaCapabilities = [ "8.6" ];   # RTX 3060 = Ampere
+    cudaForwardCompat = false;
+  };
 in
 {
+  # ===== HERMES AGENT =====
   services.hermes-agent = {
     enable = true;
+    
     settings = {
-      # Настраиваем локальный провайдер (OpenAI-совместимый API)
       providers = {
         local = {
           type = "openai";
@@ -25,33 +21,31 @@ in
           default_model = "ornith-9b";
           context_length = 64000;
         };
+        nous.enabled = false;
+        openrouter.enabled = false;
       };
       
-      # Указываем, что по умолчанию использовать локальный провайдер
       model = {
         provider = "local";
         default = "ornith-9b";
         context_length = 64000;
       };
       
-      # Отключаем внешние провайдеры
-      providers.nous.enabled = false;
-      providers.openrouter.enabled = false;
-      
-      # Отключаем auxiliary (вспомогательные задачи через внешние API)
       auxiliary.enabled = false;
     };
+    
     environmentFiles = [ "/var/lib/hermes/env" ];
     addToSystemPackages = true;
-    extraDependencyGroups = [ "messaging" ]; # адаптер телеграма
+    extraDependencyGroups = [ "messaging" ];
   };
 
-systemd.tmpfiles.rules = [
+  # ===== LLAMA-SERVER С GPU =====
+  systemd.tmpfiles.rules = [
     "d /var/lib/hermes/models 0755 hermes hermes -"
   ];
 
-systemd.services.llama-server-gpu = {
-     description = "llama.cpp GPU server for Hermes";
+  systemd.services.llama-server-gpu = {
+    description = "llama.cpp GPU server for Hermes";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
@@ -62,9 +56,57 @@ systemd.services.llama-server-gpu = {
       ReadWritePaths = [ "/var/lib/hermes" ];
       Restart = "always";
       RestartSec = 5;
-      # Даём процессу доступ к CUDA-библиотекам
+      
       Environment = [
-        "LD_LIBRARY_PATH=${pkgs.cudaPackages.libcublas}/lib:${pkgs.cudaPackages.cuda_cudart}/lib"
+        "LD_LIBRARY_PATH=${lib.makeLibraryPath [
+          pkgs.cudaPackages.libcublas
+          pkgs.cudaPackages.cuda_cudart
+          config.hardware.nvidia.package
+        ]}"
+      ];
+      
+      ExecStart = ''
+        ${llama-cpp-gpu}/bin/llama-server \
+          --host 10.250.77.1 \
+          --port 8080 \
+          --n-gpu-layers 99 \
+          --ctx-size 16384 \
+          --alias ornith-9b \
+          --model /var/lib/hermes/models/model.gguf
+      '';
+    };
+  };
+
+  # ===== HERMES DASHBOARD =====
+  systemd.services.hermes-dashboard = {
+    description = "Hermes Agent Dashboard (Web UI)";
+    after = [ "tailscale-hermes-up.service" "hermes-agent.service" ];
+    bindsTo = [ "tailscale-hermes-up.service" ];
+    wantedBy = [ "multi-user.target" ];
+    
+    environment = {
+      HERMES_HOME = "/var/lib/hermes/.hermes";
+      HERMES_MANAGED = "true";
+      HOME = "/var/lib/hermes";
+    };
+
+    serviceConfig = {
+      User = "hermes";
+      Group = "hermes";
+      NetworkNamespacePath = "/var/run/netns/hermes-egress";
+      WorkingDirectory = "/var/lib/hermes/workspace";
+      ReadWritePaths = [ "/var/lib/hermes" "/var/lib/hermes/workspace" ];
+      ProtectSystem = "strict";
+      PrivateTmp = true;
+      NoNewPrivileges = true;
+      Restart = "always";
+      RestartSec = 5;
+      UMask = "0007";
+      
+      ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 0.0.0.0 --port 9119 --no-open";
+    };
+  };
+}        "LD_LIBRARY_PATH=${pkgs.cudaPackages.libcublas}/lib:${pkgs.cudaPackages.cuda_cudart}/lib"
       ];
       ExecStart = ''
         ${llama-cpp-gpu}/bin/llama-server \
