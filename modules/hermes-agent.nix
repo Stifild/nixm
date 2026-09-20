@@ -11,9 +11,17 @@ in
 {
   services.hermes-agent = {
     enable = true;
-    settings.model.default = "ornith-9b"; # свой провайдер/модель
-    settings.model.base_url = "http://10.250.77.1:8080/v1";
+    settings.model = {
+      base_url = "http://10.250.77.1:8080/v1";
+      default  = "ornith-9b";
+      context_length = 64000;
+    };
     settings.providers.nous.enabled = false;
+    settings.auxiliary = {
+      enabled = true;
+      model = "ornith-9b";
+      free_only = true;
+    };
     settings.providers.openrouter.enabled = false;
     settings.dashboard = {
       # Разрешаем подключения по Tailscale IP и MagicDNS имени
