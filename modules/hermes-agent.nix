@@ -9,7 +9,7 @@
 
     backend = {
       mode = "dashboard";  # веб-панель + gateway в одном процессе
-      host = "100.74.132.126";  # tailscale IP хоста (tailscale ip -4)
+      host = "0.0.0.0";  # tailscale IP хоста (tailscale ip -4)
       port = 9119;
     };
   };
