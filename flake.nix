@@ -4,9 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
+    hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nix-flatpak, ... }:
+  outputs = { self, nixpkgs, nix-flatpak, hermes-agent, ... }:
     let
       system = "x86_64-linux";
 
@@ -25,6 +27,8 @@
         ./modules/apps.nix
         ./modules/sshd.nix
         nix-flatpak.nixosModules.nix-flatpak
+        hermes-agent.nixosModules.default
+        ./modules/hermes-agent.nix
       ];
 
       mkHost = { hostName, extraModules ? [ ] }:
