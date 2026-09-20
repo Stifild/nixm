@@ -29,6 +29,7 @@
         nix-flatpak.nixosModules.nix-flatpak
         hermes-agent.nixosModules.default
         ./modules/hermes-agent.nix
+        ./modules/hermes-egress.nix
       ];
 
       mkHost = { hostName, extraModules ? [ ] }:
