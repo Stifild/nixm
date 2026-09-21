@@ -23,7 +23,7 @@ in
         local = {
           base_url = "http://127.0.0.1:8080/v1";
           default_model = "ornith-9b";
-          context_length = 64000;
+          context_length = 16384;
           api_key = "not-needed";
         };
         nous.enabled = false;
@@ -33,10 +33,11 @@ in
       model = {
         provider = "local";
         default = "ornith-9b";
-        context_length = 64000;
+        context_length = 16384;
       };
 
-      auxiliary.enabled = false;
+      auxiliary.enabled = false;\
+      compression.enabled = false;
       dashboard.basic_auth = {
         username      = "stifild";
         password_hash = "scrypt$16384$8$1$ihEL6GADGa7HY35YsjKqsw==$3bKD6O1FLa8qOxo2mPFOJf3JuTFwAb9zOj+chkCNtpE=";
