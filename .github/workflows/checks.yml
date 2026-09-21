@@ -43,8 +43,14 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
 
+      - name: Install jq
+        run: nix-env -iA nixpkgs.jq
+
       - name: Build all host configurations
         run: |
           set -euo pipefail
-          # nix build в flake собирает все nixosConfigurations сразу.
-          nix build --print-build-logs
+          for host in $(nix eval --json .#nixosConfigurations --apply builtins.attrNames | jq -r '.[]'); do
+            echo "::group:$host"
+            nix build ".#nixosConfigurations.$host.config.system.build.toplevel" --print-build-logs --no-link
+            echo "::endgroup::"
+          done

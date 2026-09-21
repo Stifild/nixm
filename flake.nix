@@ -41,6 +41,8 @@
         };
     in
     {
+      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
+
       nixosConfigurations = {
         mswax-pc = mkHost {
           hostName = "mswax-pc";
