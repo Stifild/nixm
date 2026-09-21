@@ -36,7 +36,7 @@ in
         context_length = 16384;
       };
 
-      auxiliary.enabled = false;\
+      auxiliary.enabled = false;
       compression.enabled = false;
       dashboard.basic_auth = {
         username      = "stifild";
