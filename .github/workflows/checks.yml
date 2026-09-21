@@ -18,15 +18,25 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
 
-      - name: Parse + format-check .nix files
-        # nix-instantiate --parse проверяет синтаксис каждого файла;
-        # nix fmt --check — формат по rfc-style. Оба пробрасывают ненулевой код при ошибке.
+      - name: Install nixfmt
+        # nixfmt — отдельный пакет из nixpkgs, работает на любой версии Nix
+        # (в отличие от подкоманды `nix fmt`, которой нет до Nix 2.35).
+        run: nix-env -iA nixpkgs.nixfmt
+
+      - name: Parse .nix files
+        # nix-instantiate --parse проверяет синтаксис каждого файла.
         run: |
           set -euo pipefail
           while read -r f; do
             nix-instantiate --parse "$f" >/dev/null
           done < <(find . -type f -name '*.nix' -not -path './.git/*')
-          nix fmt --check .
+
+      - name: Format-check .nix files
+        # nixfmt -c — проверка формата по rfc-style без записи; ненулевой код при расхождении.
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find . -type f -name '*.nix' -not -path './.git/*')
+          nixfmt -c "${files[@]}"
 
   # Сборка каждой nixosConfigurations из flake.nix
   build:
