@@ -23,7 +23,7 @@ in
         local = {
           base_url = "http://127.0.0.1:8080/v1";
           default_model = "ornith-9b";
-          context_length = 16384;
+          context_length = 64000;
           api_key = "not-needed";
         };
         nous.enabled = false;
@@ -33,7 +33,7 @@ in
       model = {
         provider = "local";
         default = "ornith-9b";
-        context_length = 16384;
+        context_length = 64000;
       };
 
       auxiliary.enabled = false;
@@ -76,7 +76,10 @@ in
         --host 127.0.0.1 \
         --port 8080 \
         --n-gpu-layers 99 \
-        --ctx-size 16384 \
+        --ctx-size 64000 \
+        --parallel 1 \
+        --cache-type-k q4_0 \
+        --cache-type-v q4_0 \
         --alias ornith-9b \
         --model /var/lib/hermes/models/model.gguf
     '';
