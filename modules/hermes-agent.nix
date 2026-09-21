@@ -37,6 +37,10 @@ in
       };
 
       auxiliary.enabled = false;
+      dashboard.basic_auth = {
+        username      = "stifild";
+        password_hash = "scrypt$16384$8$1$ihEL6GADGa7HY35YsjKqsw==$3bKD6O1FLa8qOxo2mPFOJf3JuTFwAb9zOj+chkCNtpE=";
+      };
     };
 
     environmentFiles = [ "/var/lib/hermes/env" ];
