@@ -28,6 +28,7 @@
     onlyoffice-desktopeditors
     vim
     git
+    gh
     wget
     curl
   ];
