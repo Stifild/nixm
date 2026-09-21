@@ -81,7 +81,11 @@ in
     '';
   };
 };
-
+systemd.services.hermes-agent = {
+  after   = [ "tailscale-hermes-up.service" ];
+  bindsTo = [ "tailscale-hermes-up.service" ];
+  serviceConfig.NetworkNamespacePath = "/var/run/netns/hermes-egress";
+};
   # ===== HERMES DASHBOARD (веб-интерфейс) =====
   systemd.services.hermes-dashboard = {
     description = "Hermes Agent Dashboard (Web UI)";
